@@ -1,5 +1,5 @@
 // 
-// DummyStateVariable.cs
+// StateVariableOptions.cs
 //  
 // Author:
 //       Scott Peterson <lunchtimemama@gmail.com>
@@ -24,22 +24,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-
-namespace Mono.Upnp.Control.Tests
+namespace Mono.Upnp.Control
 {
-    public class DummyStateVariable : StateVariable
+    public class StateVariableOptions
     {
-        static readonly DummyStateVariableEventer eventer = new DummyStateVariableEventer ();
+        public string DefaultValue { get; set; }
         
-        public DummyStateVariable (string name, string dataType)
-            : this (name, dataType, false)
-        {
-        }
+        public StateVariableEventer Eventer { get; set; }
         
-        public DummyStateVariable (string name, string dataType, bool isMulticast)
-            : base (name, dataType, new StateVariableOptions { Eventer = eventer, IsMulticast = isMulticast })
-        {
-        }
+        public bool IsMulticast { get; set; }
     }
 }
