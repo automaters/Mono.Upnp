@@ -24,6 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -33,6 +34,7 @@ namespace Mono.Upnp.Internal
     {
         public void Add (string key, string value)
         {
+            throw new NotSupportedException ();
         }
 
         public bool ContainsKey (string key)
@@ -55,7 +57,9 @@ namespace Mono.Upnp.Internal
             get {
                 return null;
             }
-            set {}
+            set {
+                throw new NotSupportedException ();
+            }
         }
 
         public ICollection<string> Keys {
@@ -82,10 +86,12 @@ namespace Mono.Upnp.Internal
 
         public void Add (KeyValuePair<string, string> item)
         {
+            throw new NotSupportedException ();
         }
 
         public void Clear ()
         {
+            throw new NotSupportedException ();
         }
 
         public bool Contains (KeyValuePair<string, string> item)
@@ -99,7 +105,7 @@ namespace Mono.Upnp.Internal
 
         public bool Remove (KeyValuePair<string, string> item)
         {
-            return false;
+            throw new NotSupportedException ();
         }
 
         public int Count {
