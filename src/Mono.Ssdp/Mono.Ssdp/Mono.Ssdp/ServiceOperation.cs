@@ -1,10 +1,10 @@
 // 
-// UpnpStateVariableAttribute.cs
+// ServiceOperation.cs
 //  
 // Author:
-//       Scott Peterson <lunchtimemama@gmail.com>
-// 
-// Copyright (c) 2009 Scott Peterson
+//   Aaron Bockover <abockover@novell.com>
+//
+// Copyright (C) 2008 Novell, Inc.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,34 +24,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-
-namespace Mono.Upnp.Control
+namespace Mono.Ssdp
 {
-    [AttributeUsage (AttributeTargets.Event)]
-    public class UpnpStateVariableAttribute : Attribute
+    public enum ServiceOperation
     {
-        public UpnpStateVariableAttribute ()
-        {
-        }
-        
-        public UpnpStateVariableAttribute (string name)
-            : this (name, null)
-        {
-        }
-        
-        public UpnpStateVariableAttribute (string name, string dataType)
-        {
-            Name = name;
-            DataType = dataType;
-        }
-        
-        public string Name { get; set; }
-        
-        public string DataType { get; set; }
-        
-        public bool IsMulticast { get; set; }
-        
-        public string OmitUnless { get; set; }
+        Added,
+        Updated,
+        Removed
     }
 }
