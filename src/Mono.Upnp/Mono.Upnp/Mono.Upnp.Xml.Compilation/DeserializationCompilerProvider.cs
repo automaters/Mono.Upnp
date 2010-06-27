@@ -1,10 +1,10 @@
 // 
-// DelegateDeserializationCompilerFactory.cs
+// DeserializationCompilerProvider.cs
 //  
 // Author:
 //       Scott Peterson <lunchtimemama@gmail.com>
 // 
-// Copyright (c) 2009 Scott Peterson
+// Copyright (c) 2010 Scott Peterson
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,12 +28,7 @@ using System;
 
 namespace Mono.Upnp.Xml.Compilation
 {
-    public class DelegateDeserializationCompilerFactory : DeserializationCompilerFactory
-    {
-        public override DeserializationCompiler CreateDeserializationCompiler (XmlDeserializer xmlDeserializer, Type type)
-        {
-            return new DelegateDeserializationCompiler (xmlDeserializer, type);
-        }
-
-    }
+    public delegate DeserializationCompiler DeserializationCompilerProvider (XmlDeserializer xmlDeserializer,
+                                                                             Type type);
 }
+
