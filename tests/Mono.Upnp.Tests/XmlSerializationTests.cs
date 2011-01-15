@@ -683,7 +683,7 @@ namespace Mono.Upnp.Tests
                 set { base.Foo = value; }
             }
             
-            public override string ToString () { return null; }
+            public override string ToString () { return string.Empty; }
         }
         
         [Test]
