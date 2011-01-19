@@ -53,8 +53,18 @@ namespace Mono.Ssdp.Internal
                 throw new ArgumentException ("The specified network interface does not support IPv4.", "networkInterface");
             }
             var host_name = Dns.GetHostName ();
-            foreach (var address in properties.UnicastAddresses) {
-                if (address.Address.AddressFamily == AddressFamily.InterNetwork && Dns.GetHostEntry (address.Address).HostName == host_name) {
+            foreach (var address in properties.UnicastAddresses)
+            {
+                string addressHostname = null;
+                try
+                {
+                    addressHostname = Dns.GetHostEntry(address.Address).HostName;
+                }
+                catch(SocketException)
+                {
+                    
+                }
+                if (address.Address.AddressFamily == AddressFamily.InterNetwork && addressHostname == host_name) {
                     return new NetworkInterfaceInfo (address.Address, ipv4_properties.Index);
                 }
             }
