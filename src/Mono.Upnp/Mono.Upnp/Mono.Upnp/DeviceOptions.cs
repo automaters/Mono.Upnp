@@ -31,6 +31,8 @@ namespace Mono.Upnp
 {
     public class DeviceOptions
     {
+        public IEnumerable<Device> EmbeddedDevices { get; set; }
+
         public IEnumerable<Service> Services { get; set; }
         
         public IEnumerable<Icon> Icons { get; set; }
