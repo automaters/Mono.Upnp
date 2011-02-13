@@ -689,9 +689,10 @@ namespace Mono.Upnp.Tests
         [Test]
         public void OverrideOmitTest ()
         {
-            Assert.AreEqual (
-                @"<?xml version=""1.0""?><OverrideOmitTestSubClass />",
-                serializer.GetString (new OverrideOmitTestSubClass { Foo = "bar" })
+            Assert.That (
+                serializer.GetString (new OverrideOmitTestSubClass { Foo = "bar" }),
+                Is.EqualTo(@"<?xml version=""1.0""?><OverrideOmitTestSubClass />").Or.EqualTo(
+                    @"<?xml version=""1.0""?><OverrideOmitTestSubClass></OverrideOmitTestSubClass>")
             );
             
             Assert.AreEqual (
@@ -795,9 +796,11 @@ namespace Mono.Upnp.Tests
         [Test]
         public void NamespaceTest ()
         {
-            Assert.AreEqual (
-                @"<?xml version=""1.0""?><NamespaceTestClass xmlns:b=""udn:mono-upnp:bar"" xmlns:f=""udn:mono-upnp:foo""><f:Foo>foo</f:Foo><b:Bar>bar</b:Bar></NamespaceTestClass>",
-                serializer.GetString (new NamespaceTestClass { Foo = "foo", Bar = "bar" }));
+            Assert.That (
+                serializer.GetString (new NamespaceTestClass { Foo = "foo", Bar = "bar" }),
+                Is.EqualTo(@"<?xml version=""1.0""?><NamespaceTestClass xmlns:b=""udn:mono-upnp:bar"" xmlns:f=""udn:mono-upnp:foo""><f:Foo>foo</f:Foo><b:Bar>bar</b:Bar></NamespaceTestClass>").
+                Or.EqualTo(@"<?xml version=""1.0""?><NamespaceTestClass xmlns:f=""udn:mono-upnp:foo"" xmlns:b=""udn:mono-upnp:bar""><f:Foo>foo</f:Foo><b:Bar>bar</b:Bar></NamespaceTestClass>")
+            );
         }
         
         class ValueTestClass
