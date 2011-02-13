@@ -47,18 +47,37 @@ namespace Mono.Ssdp
 
         void AsyncReadResult (AsyncReceiveBuffer buffer)
         {
-            buffer.Socket.BeginReceiveFrom (buffer, OnAsyncResultReceived);
+            try
+            {
+                buffer.Socket.BeginReceiveFrom(buffer, OnAsyncResultReceived);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Socket disposed while we were receiving from it... just ignore this
+            }
         }
         
         void OnAsyncResultReceived (IAsyncResult asyncResult)
         {
             var buffer = (AsyncReceiveBuffer)asyncResult.AsyncState;
-            buffer.BytesReceived = buffer.Socket.EndReceiveFrom (asyncResult, ref buffer.SenderEndPoint);
-            
-            if (OnAsyncResultReceived (buffer)) {
-                AsyncReadResult (buffer);
-            } else {
-                buffer.Socket.Close ();
+
+            try
+            {
+                buffer.BytesReceived = buffer.Socket.EndReceiveFrom(asyncResult, ref buffer.SenderEndPoint);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Socket already disposed... just ignore this and exit
+                return;
+            }
+
+            if (OnAsyncResultReceived(buffer))
+            {
+                AsyncReadResult(buffer);
+            }
+            else
+            {
+                buffer.Socket.Close();
             }
         }
         
