@@ -67,6 +67,14 @@ namespace Mono.Upnp
         internal virtual void Dispose ()
         {
             is_disposed = true;
+            OnDisposed();
+        }
+
+        protected virtual void OnDisposed()
+        {
+            var handler = disposed;
+            if (handler != null)
+                handler(this, new DisposedEventArgs());
         }
         
         event EventHandler<DisposedEventArgs> disposed;
