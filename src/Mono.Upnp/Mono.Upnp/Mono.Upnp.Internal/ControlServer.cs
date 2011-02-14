@@ -64,87 +64,119 @@ namespace Mono.Upnp.Internal
             
             context.Response.ContentType = @"text/xml; charset=""utf-8""";
             context.Response.AddHeader ("EXT", string.Empty);
-            
-            using (var reader = XmlReader.Create (context.Request.InputStream)) {
-                // FIXME this is a workaround for mono bug 523151
-                if (reader.MoveToContent () != XmlNodeType.Element) {
-                    Log.Error (string.Format (
-                        "A control request from {0} to {1} does not have a SOAP envelope.",
-                        context.Request.RemoteEndPoint, context.Request.Url));
-                    return;
-                }
 
-                SoapEnvelope<Arguments> requestEnvelope;
-
-                try {
-                    requestEnvelope = deserializer.Deserialize<SoapEnvelope<Arguments>> (reader);
-                } catch (Exception e) {
-                    Log.Exception (string.Format (
-                        "Failed to deserialize a control request from {0} to {1}.",
-                        context.Request.RemoteEndPoint, context.Request.Url), e);
-                    return;
-                }
-                
-                if (requestEnvelope == null) {
-                    Log.Error (string.Format (
-                        "A control request from {0} to {1} does not have a valid SOAP envelope.",
-                        context.Request.RemoteEndPoint, context.Request.Url));
-                    return;
-                }
-                
-                var arguments = requestEnvelope.Body;
-                
-                if (arguments == null) {
-                    Log.Error (string.Format (
-                        "A control request from {0} to {1} does not have a valid argument list.",
-                        context.Request.RemoteEndPoint, context.Request.Url));
-                    return;
-                }
-
-                if (arguments.ActionName == null) {
-                    Log.Error (string.Format (
-                        "A control request from {0} to {1} does not have an action name.",
-                        context.Request.RemoteEndPoint, context.Request.Url));
-                    return;
-                }
-                
-                ServiceAction action;
-
-                try {
-                    if (actions.TryGetValue (arguments.ActionName, out action)) {
-                        Log.Information (string.Format ("{0} invoked {1} on {2}.",
-                            context.Request.RemoteEndPoint, arguments.ActionName, context.Request.Url));
-
-                        Arguments result;
-
-                        try {
-                            result = new Arguments (
-                                service_type, action.Name, action.Execute (arguments.Values), true);
-                        } catch (UpnpControlException) {
-                            throw;
-                        } catch (Exception e) {
-                            throw new UpnpControlException (UpnpError.Unknown (), "Unexpected exception.", e);
-                        }
-
-                        // TODO If we're allowing consumer code to subclass Argument, then we need to expose that in a
-                        // Mono.Upnp.Serializer class. We would then need to put this in a try/catch because custom
-                        // serialization code could throw.
-                        serializer.Serialize (new SoapEnvelope<Arguments> (result), context.Response.OutputStream);
-                    } else {
-                        throw new UpnpControlException (UpnpError.InvalidAction (), string.Format (
-                            "{0} attempted to invoke the non-existant action {1} on {2}.",
-                            context.Request.RemoteEndPoint, arguments.ActionName, context.Request.Url));
+            try
+            {
+                using (var reader = XmlReader.Create(new StreamReader(context.Request.InputStream, context.Request.ContentEncoding)))
+                {
+                    // FIXME this is a workaround for mono bug 523151
+                    if (reader.MoveToContent() != XmlNodeType.Element)
+                    {
+                        Log.Error(string.Format(
+                            "A control request from {0} to {1} does not have a SOAP envelope.",
+                            context.Request.RemoteEndPoint, context.Request.Url));
+                        return;
                     }
-                } catch (UpnpControlException e) {
-                    Log.Exception (e);
 
-                    context.Response.StatusCode = 500;
-                    context.Response.StatusDescription = "Internal Server Error";
+                    SoapEnvelope<Arguments> requestEnvelope;
 
-                    // TODO This needs to be a try/catch in the future too.
-                    serializer.Serialize (new SoapEnvelope<SoapFault<UpnpError>> (
-                        new SoapFault<UpnpError> (e.UpnpError)), context.Response.OutputStream);
+                    try
+                    {
+                        requestEnvelope = deserializer.Deserialize<SoapEnvelope<Arguments>>(reader);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Exception(string.Format(
+                            "Failed to deserialize a control request from {0} to {1}.",
+                            context.Request.RemoteEndPoint, context.Request.Url), e);
+                        return;
+                    }
+
+                    if (requestEnvelope == null)
+                    {
+                        Log.Error(string.Format(
+                            "A control request from {0} to {1} does not have a valid SOAP envelope.",
+                            context.Request.RemoteEndPoint, context.Request.Url));
+                        return;
+                    }
+
+                    var arguments = requestEnvelope.Body;
+
+                    if (arguments == null)
+                    {
+                        Log.Error(string.Format(
+                            "A control request from {0} to {1} does not have a valid argument list.",
+                            context.Request.RemoteEndPoint, context.Request.Url));
+                        return;
+                    }
+
+                    if (arguments.ActionName == null)
+                    {
+                        Log.Error(string.Format(
+                            "A control request from {0} to {1} does not have an action name.",
+                            context.Request.RemoteEndPoint, context.Request.Url));
+                        return;
+                    }
+
+                    ServiceAction action;
+
+                    try
+                    {
+                        if (actions.TryGetValue(arguments.ActionName, out action))
+                        {
+                            Log.Information(string.Format("{0} invoked {1} on {2}.",
+                                context.Request.RemoteEndPoint, arguments.ActionName, context.Request.Url));
+
+                            Arguments result;
+
+                            try
+                            {
+                                result = new Arguments(
+                                    service_type, action.Name, action.ExecuteOrInvoke(arguments.Values), true);
+                            }
+                            catch (UpnpControlException)
+                            {
+                                throw;
+                            }
+                            catch (Exception e)
+                            {
+                                throw new UpnpControlException(UpnpError.Unknown(), "Unexpected exception.", e);
+                            }
+
+                            // TODO If we're allowing consumer code to subclass Argument, then we need to expose that in a
+                            // Mono.Upnp.Serializer class. We would then need to put this in a try/catch because custom
+                            // serialization code could throw.
+                            serializer.Serialize(new SoapEnvelope<Arguments>(result), context.Response.OutputStream);
+                        }
+                        else
+                        {
+                            throw new UpnpControlException(UpnpError.InvalidAction(), string.Format(
+                                "{0} attempted to invoke the non-existant action {1} on {2}.",
+                                context.Request.RemoteEndPoint, arguments.ActionName, context.Request.Url));
+                        }
+                    }
+                    catch (UpnpControlException e)
+                    {
+                        Log.Exception(e);
+
+                        context.Response.StatusCode = 500;
+                        context.Response.StatusDescription = "Internal Server Error";
+
+                        // TODO This needs to be a try/catch in the future too.
+                        serializer.Serialize(new SoapEnvelope<SoapFault<UpnpError>>(
+                            new SoapFault<UpnpError>(e.UpnpError)), context.Response.OutputStream);
+                    }
                 }
+            }
+            catch (XmlException ex)
+            {
+                Log.Exception(ex);
+
+                context.Response.StatusCode = 500;
+                context.Response.StatusDescription = "Internal Server Error";
+
+                serializer.Serialize(new SoapEnvelope<SoapFault<UpnpError>>(
+                    new SoapFault<UpnpError>(new UpnpError(ex.LineNumber, ex.Message))), context.Response.OutputStream);
             }
         }
     }
